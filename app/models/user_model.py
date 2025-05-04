@@ -73,6 +73,8 @@ class User(Base):
     verification_token = Column(String, nullable=True)
     email_verified: Mapped[bool] = Column(Boolean, default=False, nullable=False)
     hashed_password: Mapped[str] = Column(String(255), nullable=False)
+    location: Mapped[str] = Column(String(255), nullable=True)
+    professional_ststus: Mapped[str] = Column(Boolean)
 
 
     def __repr__(self) -> str:
