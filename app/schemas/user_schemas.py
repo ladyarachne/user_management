@@ -17,6 +17,11 @@ def validate_url(url: Optional[str]) -> Optional[str]:
         raise ValueError('Invalid URL format')
     return url
 
+class UserProfileUpdate(BaseModel):
+    bio: Optional[str] = Field(None, max_length=255)
+    location: Optional[str] = Field(None, max_length=100)
+
+
 class UserBase(BaseModel):
     email: EmailStr = Field(..., example="john.doe@example.com")
     nickname: Optional[str] = Field(None, min_length=3, pattern=r'^[\w-]+$', example=generate_nickname())
