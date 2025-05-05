@@ -107,6 +107,17 @@ async def update_user(user_id: UUID, user_update: UserUpdate, request: Request, 
         updated_at=updated_user.updated_at,
         links=create_user_links(updated_user.id, request)
     )
+@router.put("/profile", response_model=UserPublic)
+async def update_profile(
+    payload: UserProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    current_user.bio = payload.bio
+    current_user.location = payload.location
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, name="delete_user", tags=["User Management Requires (Admin or Manager Roles)"])
@@ -164,7 +175,18 @@ async def create_user(user: UserCreate, request: Request, db: AsyncSession = Dep
         links=create_user_links(created_user.id, request)
     )
 
-
+@router.put("/profile", response_model=UserPublic)
+async def update_profile(
+    payload: UserProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    current_user.bio = payload.bio
+    current_user.location = payload.location
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+python 
 @router.get("/users/", response_model=UserListResponse, tags=["User Management Requires (Admin or Manager Roles)"])
 async def list_users(
     request: Request,
