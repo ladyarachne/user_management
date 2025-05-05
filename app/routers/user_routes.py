@@ -109,7 +109,7 @@ async def update_user(user_id: UUID, user_update: UserUpdate, request: Request, 
     )
 @router.put("/profile", response_model=UserPublic)
 async def update_profile(
-    payload: UserProfileUpdate,
+    payload: UserUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -119,6 +119,21 @@ async def update_profile(
     db.refresh(current_user)
     return current_user
 
+@router.put("/admin/upgrade-user", response_model=UserResponse, tags=["User Management Requires Admin"])
+async def upgrade_user(
+    payload: UpgradeProfessionalStatus,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_admin)
+):
+    user = db.query(User).filter(User.id == payload.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.professional_status = payload.professional_status
+    db.commit()
+    db.refresh(user)
+    
+    return UserResponse.model_validate(user)
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, name="delete_user", tags=["User Management Requires (Admin or Manager Roles)"])
 async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
@@ -175,18 +190,7 @@ async def create_user(user: UserCreate, request: Request, db: AsyncSession = Dep
         links=create_user_links(created_user.id, request)
     )
 
-@router.put("/profile", response_model=UserPublic)
-async def update_profile(
-    payload: UserProfileUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    current_user.bio = payload.bio
-    current_user.location = payload.location
-    db.commit()
-    db.refresh(current_user)
-    return current_user
-python 
+
 @router.get("/users/", response_model=UserListResponse, tags=["User Management Requires (Admin or Manager Roles)"])
 async def list_users(
     request: Request,
