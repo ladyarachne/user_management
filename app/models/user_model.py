@@ -95,7 +95,7 @@ class User(Base):
     email_verified: Mapped[bool] = Column(Boolean, default=False, nullable=False)
     hashed_password: Mapped[str] = Column(String(255), nullable=False)
     location: Mapped[str] = Column(String(255), nullable=True, default="")
-    professional_ststus: Mapped[str] = Column(Boolean)
+    professional_status: Mapped[bool] = Column(Boolean, default=False)
 
     def __repr__(self) -> str:
         """Provides a readable representation of a user object."""

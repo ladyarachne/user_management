@@ -64,12 +64,20 @@ async def update_profile(
     - **payload**: UserProfileUpdate model with updated user information.
     """
     # Implementation of the update_profile function
-    current_user.bio = payload.bio
-    current_user.location = payload.location
-    db.commit()
-    db.refresh(current_user)
-    logger.info(f"User {current_user.id} updated their profile.")
-    return current_user
+    if payload.bio is not None:
+        current_user.bio = payload.bio
+    if payload.location is not None:
+        current_user.location = payload.location
+    
+    try:
+        db.commit()
+        db.refresh(current_user)
+        logger.info(f"User {current_user.id} updated their profile.")
+        return current_user
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error updating profile for user {current_user.id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error updating profile")
 
 @router.get(
     "/users/{user_id}",
@@ -173,17 +181,19 @@ async def update_user(
     )
 
 
-@router.put("/profile", response_model=UserResponse)
-async def update_profile(
-    payload: UserUpdate,
+@router.get("/me", response_model=UserResponse, tags=["User Profile"])
+async def get_current_user_profile(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    current_user.bio = payload.bio
-    current_user.location = payload.location
-    db.commit()
-    db.refresh(current_user)
-    return current_user
+    """
+    Get the profile of the currently authenticated user.
+    
+    This endpoint returns the profile information of the currently authenticated user,
+    including their professional status.
+    """
+    return UserResponse.model_validate(current_user)
 
 
 @router.put(
@@ -339,35 +349,11 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: AsyncSession = Depends(get_db),
 ):
-    if await UserService.is_account_locked(session, form_data.username):
-        raise HTTPException(
-            status_code=400,
-            detail="Account locked due to too many failed login attempts.",
-        )
-
-    user = await UserService.login_user(session, form_data.username, form_data.password)
-    if user:
-        access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-
-        access_token = create_access_token(
-            data={"sub": user.email, "role": str(user.role.name)},
-            expires_delta=access_token_expires,
-        )
-
-        return {"access_token": access_token, "token_type": "bearer"}
-    raise HTTPException(status_code=401, detail="Incorrect email or password.")
-
-
-@router.post(
-    "/login/",
-    include_in_schema=False,
-    response_model=TokenResponse,
-    tags=["Login and Registration"],
-)
-async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    session: AsyncSession = Depends(get_db),
-):
+    """
+    Login endpoint that accepts username (email) and password.
+    
+    Returns an access token on successful authentication.
+    """
     if await UserService.is_account_locked(session, form_data.username):
         raise HTTPException(
             status_code=400,

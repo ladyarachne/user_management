@@ -33,8 +33,8 @@ class UpgradeProfessionalStatus(BaseModel):
 
 
 class UserProfileUpdate(BaseModel):
-    bio: Optional[str] = Field(None, max_length=255)
-    location: Optional[str] = Field(None, max_length=100)
+    bio: Optional[str] = Field(None, max_length=500)
+    location: Optional[str] = Field(None, max_length=255)
 
 
 
@@ -112,6 +112,8 @@ class UserResponse(UserBase):
         None, min_length=3, pattern=r"^[\w-]+$", example=generate_nickname()
     )
     is_professional: Optional[bool] = Field(default=False, example=True)
+    professional_status: Optional[bool] = Field(default=False, example=True)
+    location: Optional[str] = Field(default="", example="New York")
     role: UserRole
 
 
