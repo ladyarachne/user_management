@@ -16,7 +16,10 @@ def validate_url(url: Optional[str]) -> Optional[str]:
     if not re.match(url_regex, url):
         raise ValueError('Invalid URL format')
     return url
-
+class UpgradeProfessionalStatus(BaseModel):
+    user_id: UUID
+    professional_status: bool
+    
 class UserProfileUpdate(BaseModel):
     bio: Optional[str] = Field(None, max_length=255)
     location: Optional[str] = Field(None, max_length=100)
