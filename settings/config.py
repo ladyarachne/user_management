@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 15  # 15 minutes for access token
     refresh_token_expire_minutes: int = 1440  # 24 hours for refresh token
+    smtp_host: str = Field(default='smtp.mailtrap.io', description="SMTP host for sending emails")
+    smtp_user: str = Field(default='your-mailtrap-username', description="SMTP username for sending emails")
+    smtp_pass: str = Field(default='your-mailtrap-password', description="SMTP password for sending emails")
     # Database configuration
     database_url: str = Field(default='postgresql+asyncpg://user:password@postgres/myappdb', description="URL for connecting to the database")
 

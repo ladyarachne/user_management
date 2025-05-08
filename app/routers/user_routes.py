@@ -33,6 +33,11 @@ from app.services.jwt_service import create_access_token
 from app.utils.link_generation import create_user_links, generate_pagination_links
 from app.dependencies import get_settings
 from app.services.email_service import EmailService
+from sqlalchemy.orm import Session
+from app.models.user_model import User
+from app.dependencies import require_admin
+from app.schemas.user_schemas import UpgradeProfessionalStatus
+
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
@@ -107,7 +112,7 @@ async def update_user(user_id: UUID, user_update: UserUpdate, request: Request, 
         updated_at=updated_user.updated_at,
         links=create_user_links(updated_user.id, request)
     )
-@router.put("/profile", response_model=UserPublic)
+@router.put("/profile", response_model=UserResponse)
 async def update_profile(
     payload: UserUpdate,
     db: Session = Depends(get_db),
