@@ -28,6 +28,16 @@ class UserProfileUpdate(BaseModel):
     bio: Optional[str] = Field(None, max_length=255)
     location: Optional[str] = Field(None, max_length=100)
 
+    def test_bio_too_long(async_client,token):
+        long_bio = "x" * 300
+        response = await async_client.put(
+            "/profile",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"bio": long_bio},
+        )
+        assert response.status_code == 422
+
+
 
 class UserBase(BaseModel):
     email: EmailStr = Field(..., example="john.doe@example.com")
