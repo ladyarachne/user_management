@@ -70,7 +70,7 @@ class User(Base):
     email: Mapped[str] = Column(String(255), unique=True, nullable=False, index=True)
     first_name: Mapped[str] = Column(String(100), nullable=True)
     last_name: Mapped[str] = Column(String(100), nullable=True)
-    bio: Mapped[str] = Column(String(500), nullable=True)
+    bio: Mapped[str] = Column(String(500), nullable=True, default="")
     profile_picture_url: Mapped[str] = Column(String(255), nullable=True)
     linkedin_profile_url: Mapped[str] = Column(String(255), nullable=True)
     github_profile_url: Mapped[str] = Column(String(255), nullable=True)
@@ -94,7 +94,7 @@ class User(Base):
     verification_token = Column(String, nullable=True)
     email_verified: Mapped[bool] = Column(Boolean, default=False, nullable=False)
     hashed_password: Mapped[str] = Column(String(255), nullable=False)
-    location: Mapped[str] = Column(String(255), nullable=True)
+    location: Mapped[str] = Column(String(255), nullable=True, defailt="")
     professional_ststus: Mapped[str] = Column(Boolean)
 
     def __repr__(self) -> str:
