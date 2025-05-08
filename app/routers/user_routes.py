@@ -44,11 +44,32 @@ from sqlalchemy.orm import Session
 from app.models.user_model import User
 from app.dependencies import require_admin
 from app.schemas.user_schemas import UpgradeProfessionalStatus
+from app.schemas.user_schemas import UserProfileUpdate
+import logging
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
+logger=logging.getLogger(__name__)
 
+@router.put("/profile", response_model=UserResponse)
+async def update_profile(
+    payload: UserProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Update user profile information.
+
+    - **payload**: UserProfileUpdate model with updated user information.
+    """
+    # Implementation of the update_profile function
+    current_user.bio = payload.bio
+    current_user.location = payload.location
+    db.commit()
+    db.refresh(current_user)
+    logger.info(f"User {current_user.id} updated their profile.")
+    return current_user
 
 @router.get(
     "/users/{user_id}",
