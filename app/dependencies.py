@@ -9,13 +9,16 @@ from app.services.jwt_service import decode_token
 from settings.config import Settings
 from fastapi import Depends
 
+
 def get_settings() -> Settings:
     """Return application settings."""
     return Settings()
 
+
 def get_email_service() -> EmailService:
     template_manager = TemplateManager()
     return EmailService(template_manager=template_manager)
+
 
 async def get_db() -> AsyncSession:
     """Dependency that provides a database session for each request."""
@@ -25,9 +28,10 @@ async def get_db() -> AsyncSession:
             yield session
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
-        
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -44,11 +48,14 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return {"user_id": user_id, "role": user_role}
 
+
 def require_role(role: str):
     def role_checker(current_user: dict = Depends(get_current_user)):
         if current_user["role"] not in role:
             raise HTTPException(status_code=403, detail="Operation not permitted")
         return current_user
+
     return role_checker
+
 
 require_admin = require_role("ADMIN")
